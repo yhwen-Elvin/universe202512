@@ -1,114 +1,168 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <title>2025 · 秋冬序 · 声音</title>
-  <style>
-    body {
-      font-family: "PingFang SC", "Noto Serif SC", serif;
-      background: #f7f6f3;
-      color: #222;
-      line-height: 1.8;
-      padding: 40px;
-      max-width: 720px;
-      margin: auto;
-    }
+<meta charset="UTF-8">
+<title>2025 · 秋冬序</title>
 
-    h1 {
-      font-weight: normal;
-      font-size: 22px;
-      margin-bottom: 24px;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: "Helvetica Neue","PingFang SC",sans-serif;
+  background: #0b0e1a;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
 
-    .hidden {
-      display: none;
-    }
+.section {
+  display: none;
+  max-width: 680px;
+  padding: 32px;
+}
 
-    .password-box {
-      margin-top: 32px;
-    }
+.section.active {
+  display: block;
+}
 
-    input {
-      font-size: 16px;
-      padding: 6px 10px;
-      width: 120px;
-    }
+p {
+  line-height: 2;
+}
 
-    button {
-      font-size: 14px;
-      padding: 6px 12px;
-      margin-left: 8px;
-      cursor: pointer;
-    }
+button {
+  margin-top: 24px;
+  padding: 10px 28px;
+  font-size: 15px;
+  border: none;
+  border-radius: 24px;
+  background: #ffffff;
+  color: #0b0e1a;
+  cursor: pointer;
+}
 
-    .entry {
-      margin-top: 32px;
-      white-space: pre-line;
-    }
+input {
+  padding: 10px;
+  font-size: 16px;
+  width: 160px;
+  text-align: center;
+  border-radius: 10px;
+  border: none;
+  margin-top: 18px;
+}
 
-    audio {
-      width: 100%;
-      margin-top: 16px;
-    }
+.chapter-text {
+  text-align: left;
+  white-space: pre-line;
+  line-height: 2;
+  opacity: 0.92;
+  margin-bottom: 36px;
+}
 
-    .back {
-      margin-top: 32px;
-    }
-  </style>
+.audio-block {
+  margin-bottom: 22px;
+}
+
+.answer {
+  margin-top: 18px;
+  display: none;
+  opacity: 0.85;
+}
+
+.firework {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  animation: explode 1.2s ease-out forwards;
+}
+
+@keyframes explode {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+}
+</style>
 </head>
 
 <body>
 
-<!-- 序章页 -->
-<div id="home">
-  <h1>秋冬序</h1>
-
-  <div class="entry">
-欢迎你，小夏。
-伟大的探险家，欢迎回到这颗星球。
-
-我发觉，我们依赖视觉太多，
-用文字记录、用图片记录、用视频记录。
-
-在这里，我决定用音频记录。
-
-如果文字、图片、视频
-都能把我们拉回彼时彼刻，
-那么，音频是不是也可以呢？
-
-如果你没有参与彼时彼刻的故事，
-那么，音频是不是可以
-邀请你进入那个时空呢？
-
-在一个安静的时刻，
-戴上耳机，合上眼，
-把自己抛向大气层。
-
-我们就这样，
-沉入这片星系，
-拥抱这个宇宙。
-  </div>
-
-  <div class="password-box">
-    <input id="password" type="password" placeholder="四位密码" />
-    <button onclick="unlock()">进入</button>
-  </div>
+<!-- 首页 -->
+<div id="home" class="section active" style="text-align:center;">
+  <p>
+    欢迎你，小夏。<br>
+    伟大的探险家，<br>
+    欢迎回到这颗星球。
+  </p>
+  <button onclick="showSection('prologue')">着陆</button>
 </div>
 
-<!-- 播放页 -->
-<div id="player" class="hidden">
-  <div id="text" class="entry"></div>
-  <div id="audios"></div>
+<!-- 序章 -->
+<div id="prologue" class="section" style="text-align:center;">
+  <p>
+    我发觉，我们依赖视觉太多，<br>
+    用文字记录、用图片记录、用视频记录。<br><br>
 
-  <div class="back">
-    <button onclick="goBack()">回到序章</button>
+    在这里，我决定用音频记录。<br><br>
+
+    如果文字、图片、视频<br>
+    都能把我们拉回彼时彼刻，<br>
+    那么，音频是不是也可以呢？<br><br>
+
+    如果你没有参与彼时彼刻的故事，<br>
+    那么，音频是不是可以<br>
+    邀请你进入那个时空呢？<br><br>
+
+    在一个安静的时刻，<br>
+    戴上耳机，合上眼，<br>
+    把自己抛向大气层。<br><br>
+
+    我们就这样，<br>
+    沉入这片星系，<br>
+    拥抱这个宇宙。
+  </p>
+
+  <button onclick="showSection('home')">出发</button><br>
+  <button onclick="showSection('password')">探索</button>
+</div>
+
+<!-- 密码 -->
+<div id="password" class="section" style="text-align:center;">
+  <p>请输入星辰编号</p>
+  <input id="pwdInput" maxlength="4">
+  <br>
+  <button onclick="checkPassword()">确认</button><br>
+  <button onclick="showSection('prologue')">回到序章</button>
+</div>
+
+<!-- 章节 -->
+<div id="chapter" class="section">
+  <div id="chapterText" class="chapter-text"></div>
+
+  <!-- 答案互动（仅0526显示） -->
+  <div id="answerBlock">
+    <button id="answerBtn" onclick="showAnswer()" style="display:none;">
+      查看答案
+    </button>
+    <div id="answerText" class="answer"></div>
   </div>
+
+  <div id="audioContainer"></div>
+  <button onclick="showSection('prologue')">回到序章</button>
+</div>
+
+<!-- 生日彩蛋 -->
+<div id="birthday" class="section" style="text-align:center;">
+  <h2>生日快乐，小夏</h2>
+  <p>愿新的轨道，<br>仍有星辰相伴。</p>
+  <button onclick="showSection('prologue')">回到序章</button>
 </div>
 
 <script>
-  const data = {
-    "1128": {
-      text: `11月28日 · 朝天门
+const chapters = {
+  "1128": {
+    text: `11月28日 · 朝天门
 忙碌的事情告一段落，我终于赶上了南京的秋。
 燕雀湖想留到你来南京一起去，枫叶还没红，于是我决定去看银杏。
 朝天门的门口，一排大爷在小马扎上打牌，我猜是掼蛋——在成都围一桌是麻将，在大连是滚子，在南京嘛，应该就是掼蛋吧！
@@ -119,74 +173,112 @@
 另：
 走一步看一步，有点蠢蠢的没有把景区逛完。
 不过也好，以后，我有了一个更正当的理由拉着你来朝天门了。`,
-      files: ["voice01.mp3"]
-    },
-
-    "1213": {
-      text: `12月13日 · 南理工
+    files: ["voice01.mp3"]
+  },
+  "1213": {
+    text: `12月13日 · 南理工
 南京的十二月有自己的“落雪”。
 梧桐叶铺满地面，风吹起，又落下。
 我踩在落叶上，闭上眼，
-那声音听起来，竟像海苔碎。`,
-      files: ["voice02.mp3"]
-    },
-
-    "1205": {
-      text: `12月5日 · 燕雀湖 / 明孝陵
+梧桐清脆的声音，听起来竟像海苔碎！`,
+    files: ["voice02.mp3"]
+  },
+  "1205": {
+    text: `12月5日 · 燕雀湖 / 明孝陵
 照片里是叶、是湖、是景，
-音频里是风、是水、是人。
-欢迎来到秋日的明孝陵。
-
-另：
-第二段音频后半部分的滋滋声，
-是婴儿车走过明孝陵石子路的声音。`,
-      files: ["voice03.mp3", "voice04.mp3"]
-    },
-
-    "0526": {
-      text: `X0526
-有些星球，被命名是因为重逢。`,
-      files: ["voice05.mp3", "voice06.mp3"]
-    },
-
-    "1125": {
-      text: `11月25日 · 南理工
-午夜，校园外的公路很安静。
+音频里是风、是水、是人，
+欢迎来到秋日的明孝陵，我们就这样沉溺在这里，
+听风听雨，见山见水，看花看叶，
+观察四季轮转、光影跃动、还有这些有趣的人类。`,
+    files: ["voice03.mp3","voice04.mp3"]
+  },
+  "0526": {
+    text: `12月5日 · 明孝陵
+跟着乌鸦小姐或者先生，我又走了一遍明孝陵，
+风吹、鸟鸣、人行，
+我想，如果在这里待上四季，哪怕是发呆也是幸福的。
+另：猜猜看第二段音频后半部分的滋滋声是什么？`,
+    answer: `答：是婴儿车走过明孝陵石子路的声音！听起来就像是刚喷过油的烤肉。
+原来闭上眼睛，只听声音，我们拥有了一整个新的宇宙。`,
+    files: ["voice05.mp3","voice06.mp3"]
+  },
+  "1125": {
+    text: `11月25日 · 南理工
+午夜，校园外的柏油公路很安静。
 汽车划过柏油路，
 像笔尖划过垫板，
 又像即将起飞的飞机。`,
-      files: ["voice07.mp3"]
-    }
-  };
+    files: ["voice07.mp3"]
+  }
+};
 
-  function unlock() {
-    const pwd = document.getElementById("password").value;
-    if (!data[pwd]) {
-      alert("密码不对，再试试。");
-      return;
-    }
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
 
-    document.getElementById("home").classList.add("hidden");
-    document.getElementById("player").classList.remove("hidden");
+function checkPassword() {
+  const pwd = document.getElementById("pwdInput").value;
 
-    document.getElementById("text").innerText = data[pwd].text;
-
-    const audioBox = document.getElementById("audios");
-    audioBox.innerHTML = "";
-
-    data[pwd].files.forEach(file => {
-      const audio = document.createElement("audio");
-      audio.controls = true;
-      audio.src = file;
-      audioBox.appendChild(audio);
-    });
+  if (pwd === "1218") {
+    showSection("birthday");
+    launchFireworks();
+    return;
   }
 
-  function goBack() {
-    document.getElementById("player").classList.add("hidden");
-    document.getElementById("home").classList.remove("hidden");
-    document.getElementById("password").value = "";
+  if (!chapters[pwd]) {
+    alert("这组坐标尚未解锁。");
+    return;
   }
+
+  const chapter = chapters[pwd];
+  document.getElementById("chapterText").innerText = chapter.text;
+
+  const container = document.getElementById("audioContainer");
+  container.innerHTML = "";
+
+  // 答案互动
+  const answerBtn = document.getElementById("answerBtn");
+  const answerText = document.getElementById("answerText");
+  answerBtn.style.display = "none";
+  answerText.style.display = "none";
+
+  if (pwd === "0526") {
+    answerBtn.style.display = "inline-block";
+    answerText.innerText = chapter.answer;
+  }
+
+  chapter.files.forEach(file => {
+    const div = document.createElement("div");
+    div.className = "audio-block";
+    div.innerHTML = `
+      <audio controls>
+        <source src="${file}" type="audio/mpeg">
+      </audio>
+    `;
+    container.appendChild(div);
+  });
+
+  showSection("chapter");
+}
+
+function showAnswer() {
+  document.getElementById("answerText").style.display = "block";
+  document.getElementById("answerBtn").style.display = "none";
+}
+
+function launchFireworks() {
+  for (let i = 0; i < 80; i++) {
+    const fw = document.createElement("div");
+    fw.className = "firework";
+    fw.style.left = "50%";
+    fw.style.top = "50%";
+    fw.style.setProperty("--x", `${(Math.random()-0.5)*400}px`);
+    fw.style.setProperty("--y", `${(Math.random()-0.5)*400}px`);
+    document.body.appendChild(fw);
+    setTimeout(() => fw.remove(), 1200);
+  }
+}
 </script>
 
 </body>
