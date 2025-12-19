@@ -14,6 +14,7 @@ body {
   overflow-y: auto;
 }
 
+/* section 基础 */
 .section {
   display: none;
   max-width: 680px;
@@ -25,9 +26,16 @@ body {
   display: block;
 }
 
-p {
-  line-height: 2;
+/* 居中页面（除序章） */
+.section.centered {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
+
+/* 文本 */
+p { line-height: 2; }
 
 button {
   padding: 10px 28px;
@@ -54,19 +62,18 @@ input {
   justify-content: center;
   gap: 24px;
   margin-top: 28px;
+  flex-wrap: wrap;
 }
 
+/* 章节 */
 .chapter-text {
-  text-align: left;
   white-space: pre-line;
   line-height: 2;
   opacity: 0.92;
   margin-bottom: 36px;
 }
 
-.audio-block {
-  margin-bottom: 22px;
-}
+.audio-block { margin-bottom: 22px; }
 
 .answer {
   margin-top: 20px;
@@ -74,26 +81,34 @@ input {
   opacity: 0.85;
 }
 
-/* 星光 */
+/* 音频播放变暗 */
+.audio-dim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  z-index: 5;
+}
+.audio-dim.active { opacity: 1; }
+
+/* 银河星光 */
 .star {
   position: fixed;
-  z-index: 999;
-  width: 4px;
-  height: 4px;
-  background: white;
   border-radius: 50%;
-  opacity: 0.8;
   pointer-events: none;
-  animation: float 4s linear forwards;
+  animation: drift linear forwards;
 }
 
-@keyframes float {
+@keyframes drift {
   from {
-    transform: translateY(0);
-    opacity: 0.8;
+    transform: translate(0,0);
+    opacity: 0;
   }
+  10% { opacity: 1; }
   to {
-    transform: translateY(-120px);
+    transform: translate(var(--dx), var(--dy));
     opacity: 0;
   }
 }
@@ -102,8 +117,10 @@ input {
 
 <body>
 
+<div class="audio-dim" id="audioDim"></div>
+
 <!-- 首页 -->
-<div id="home" class="section active" style="text-align:center;">
+<div id="home" class="section centered active" style="text-align:center;">
   <p>
     欢迎你，小夏。<br>
     伟大的探险家，<br>
@@ -114,39 +131,33 @@ input {
   </div>
 </div>
 
-<!-- 序章 -->
+<!-- 序章（不居中，可滚动） -->
 <div id="prologue" class="section" style="text-align:center;">
   <p>
     我发觉，我们依赖视觉太多，<br>
     用文字记录、用图片记录、用视频记录。<br><br>
-
     在这里，我决定用音频记录。<br><br>
-
     如果文字、图片、视频<br>
     都能把我们拉回彼时彼刻，<br>
     那么，音频是不是也可以呢？<br><br>
-
     如果你没有参与彼时彼刻的故事，<br>
     那么，音频是不是可以<br>
     邀请你进入那个时空呢？<br><br>
-
     在一个安静的时刻，<br>
     戴上耳机，合上眼，<br>
     把自己抛向大气层。<br><br>
-
     我们就这样，<br>
     沉入这片星系，<br>
     拥抱这个宇宙。
   </p>
-
   <div class="button-row">
-    <button onclick="showSection('home')">启程</button>
+    <button onclick="showSection('home')">出发</button>
     <button onclick="showSection('password')">探索</button>
   </div>
 </div>
 
 <!-- 密码 -->
-<div id="password" class="section" style="text-align:center;">
+<div id="password" class="section centered" style="text-align:center;">
   <p>请输入星辰编号</p>
   <input id="pwdInput" maxlength="4">
   <div class="button-row">
@@ -156,13 +167,10 @@ input {
 </div>
 
 <!-- 章节 -->
-<div id="chapter" class="section">
+<div id="chapter" class="section centered">
   <div id="chapterText" class="chapter-text"></div>
-
   <div id="answerText" class="answer"></div>
-
   <div id="audioContainer"></div>
-
   <div class="button-row">
     <button id="answerBtn" onclick="showAnswer()" style="display:none;">查看答案</button>
     <button onclick="showSection('prologue')">回到序章</button>
@@ -170,7 +178,7 @@ input {
 </div>
 
 <!-- 生日 -->
-<div id="birthday" class="section" style="text-align:center;">
+<div id="birthday" class="section centered" style="text-align:center;">
   <h2>生日快乐，小夏</h2>
   <p>愿新的轨道，<br>仍有星辰相伴。</p>
   <div class="button-row">
@@ -180,6 +188,7 @@ input {
 
 <script>
 let starTimer = null;
+let starDensity = 300;
 
 const chapters = {
   "0526": {
@@ -188,8 +197,7 @@ const chapters = {
 风吹、鸟鸣、人行，
 我想，如果在这里待上四季，哪怕是发呆也是幸福的。
 另：猜猜看第二段音频后半部分的滋滋声是什么？`,
-    answer: `答：是婴儿车走过明孝陵石子路的声音！听起来就像是刚喷过油的烤肉。
-原来闭上眼睛，只听声音，我们拥有了一整个新的宇宙。`,
+    answer: `答：是婴儿车走过明孝陵石子路的声音！`,
     files: ["voice05.mp3","voice06.mp3"]
   }
 };
@@ -198,22 +206,14 @@ function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 
-  if (id === "birthday") startStars();
-  else stopStars();
+  if (id === "birthday") startGalaxy();
+  else stopGalaxy();
 }
 
 function checkPassword() {
-  const pwd = document.getElementById("pwdInput").value;
-
-  if (pwd === "1218") {
-    showSection("birthday");
-    return;
-  }
-
-  if (!chapters[pwd]) {
-    alert("这组坐标尚未解锁。");
-    return;
-  }
+  const pwd = pwdInput.value;
+  if (pwd === "1218") return showSection("birthday");
+  if (!chapters[pwd]) return alert("这组坐标尚未解锁。");
 
   const c = chapters[pwd];
   chapterText.innerText = c.text;
@@ -223,10 +223,12 @@ function checkPassword() {
 
   audioContainer.innerHTML = "";
   c.files.forEach(f => {
-    audioContainer.innerHTML += `
-      <div class="audio-block">
-        <audio controls src="${f}"></audio>
-      </div>`;
+    const a = document.createElement("audio");
+    a.controls = true;
+    a.src = f;
+    a.onplay = () => audioDim.classList.add("active");
+    a.onpause = a.onended = () => audioDim.classList.remove("active");
+    audioContainer.appendChild(a);
   });
 
   showSection("chapter");
@@ -237,19 +239,29 @@ function showAnswer() {
   answerBtn.style.display = "none";
 }
 
-function startStars() {
+/* 银河 */
+function startGalaxy() {
   if (starTimer) return;
   starTimer = setInterval(() => {
-    const s = document.createElement("div");
-    s.className = "star";
-    s.style.left = Math.random() * window.innerWidth + "px";
-    s.style.bottom = "0px";
-    document.body.appendChild(s);
-    setTimeout(() => s.remove(), 4000);
-  }, 300);
+    for (let i = 0; i < 3; i++) {
+      const s = document.createElement("div");
+      s.className = "star";
+      const size = Math.random() * 2 + 1;
+      s.style.width = s.style.height = size + "px";
+      s.style.left = Math.random() * window.innerWidth + "px";
+      s.style.top = Math.random() * window.innerHeight + "px";
+      s.style.background = `rgba(255,255,255,${Math.random()})`;
+      s.style.filter = "blur(0.5px)";
+      s.style.setProperty("--dx", (Math.random()*100-50)+"px");
+      s.style.setProperty("--dy", (Math.random()*100-50)+"px");
+      s.style.animationDuration = (8 + Math.random()*8) + "s";
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 16000);
+    }
+  }, starDensity);
 }
 
-function stopStars() {
+function stopGalaxy() {
   clearInterval(starTimer);
   starTimer = null;
 }
