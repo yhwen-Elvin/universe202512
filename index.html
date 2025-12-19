@@ -5,7 +5,23 @@
 <title>2025 · 秋冬序</title>
 
 <style>
+#audioDim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  z-index: 10;
+}
+
+#audioDim.active {
+  opacity: 1;
+}
+
+  
 body {
+  
   margin: 0;
   font-family: "Helvetica Neue","PingFang SC",sans-serif;
   background: #0b0e1a;
@@ -102,6 +118,8 @@ input {
 
 <body>
 
+<div id="audioDim"></div>
+  
 <!-- 首页 -->
 <div id="home" class="section active" style="text-align:center;">
   <p>
@@ -179,6 +197,30 @@ input {
 </div>
 
 <script>
+function bindAudioDim() {
+  const audios = document.querySelectorAll("audio");
+  const dim = document.getElementById("audioDim");
+
+  audios.forEach(a => {
+    a.addEventListener("play", () => {
+      dim.classList.add("active");
+    });
+
+    a.addEventListener("pause", () => {
+      if (![...audios].some(x => !x.paused)) {
+        dim.classList.remove("active");
+      }
+    });
+
+    a.addEventListener("ended", () => {
+      if (![...audios].some(x => !x.paused)) {
+        dim.classList.remove("active");
+      }
+    });
+  });
+}
+
+  
 let starTimer = null;
 
 const chapters = {
@@ -257,8 +299,14 @@ function checkPassword() {
   const c = chapters[pwd];
   chapterText.innerText = c.text;
   answerText.style.display = "none";
-  answerBtn.style.display = "inline-block";
-  answerText.innerText = c.answer;
+
+  if (c.answer) {
+    answerBtn.style.display = "inline-block";
+    answerText.innerText = c.answer;
+  } else {
+    answerBtn.style.display = "none";
+    answerText.innerText = "";
+  }
 
   audioContainer.innerHTML = "";
   c.files.forEach(f => {
@@ -267,7 +315,7 @@ function checkPassword() {
         <audio controls src="${f}"></audio>
       </div>`;
   });
-
+  bindAudioDim();
   showSection("chapter");
 }
 
