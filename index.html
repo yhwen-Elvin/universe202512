@@ -237,11 +237,15 @@ const chapters = {
 又像即将起飞的飞机。`,
     files: ["voice07.mp3"]
   }
-};;
+};
 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+
+  // 🔴 关键修复：强制回到页面顶部
+  window.scrollTo({ top: 0, behavior: "instant" });
+
   id === "birthday" ? startGalaxy() : stopGalaxy();
 }
 
