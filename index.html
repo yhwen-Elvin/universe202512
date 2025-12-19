@@ -12,16 +12,13 @@ body {
   color: #fff;
   min-height: 100vh;
   overflow-y: auto;
-  display: flex;
-  justify-content: center;
 }
 
 .section {
   display: none;
   max-width: 680px;
   padding: 32px;
-  margin: auto;
-  overflow-y: auto;
+  margin: 0 auto;
 }
 
 .section.active {
@@ -80,11 +77,13 @@ input {
 /* 星光 */
 .star {
   position: fixed;
+  z-index: 999;
   width: 4px;
   height: 4px;
   background: white;
   border-radius: 50%;
   opacity: 0.8;
+  pointer-events: none;
   animation: float 4s linear forwards;
 }
 
@@ -141,7 +140,7 @@ input {
   </p>
 
   <div class="button-row">
-    <button onclick="showSection('home')">出发</button>
+    <button onclick="showSection('home')">启程</button>
     <button onclick="showSection('password')">探索</button>
   </div>
 </div>
@@ -204,7 +203,7 @@ function showSection(id) {
 }
 
 function checkPassword() {
-  const pwd = pwdInput.value;
+  const pwd = document.getElementById("pwdInput").value;
 
   if (pwd === "1218") {
     showSection("birthday");
