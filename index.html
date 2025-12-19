@@ -2,26 +2,11 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>2025 · 秋冬序</title>
 
 <style>
-#audioDim {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.6s ease;
-  z-index: 10;
-}
-
-#audioDim.active {
-  opacity: 1;
-}
-
-  
 body {
-  
   margin: 0;
   font-family: "Helvetica Neue","PingFang SC",sans-serif;
   background: #0b0e1a;
@@ -30,21 +15,32 @@ body {
   overflow-y: auto;
 }
 
+/* 通用区块 */
 .section {
   display: none;
-  max-width: 680px;
-  padding: 32px;
+  max-width: 720px;
+  padding: clamp(20px, 5vw, 36px);
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .section.active {
   display: block;
 }
 
+/* 非序章页面居中 */
+.centered {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 p {
   line-height: 2;
 }
 
+/* 按钮 */
 button {
   padding: 10px 28px;
   font-size: 15px;
@@ -53,8 +49,10 @@ button {
   background: #ffffff;
   color: #0b0e1a;
   cursor: pointer;
+  min-width: 120px;
 }
 
+/* 输入框 */
 input {
   padding: 10px;
   font-size: 16px;
@@ -65,13 +63,16 @@ input {
   margin-top: 18px;
 }
 
+/* 按钮排布 */
 .button-row {
   display: flex;
   justify-content: center;
-  gap: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
   margin-top: 28px;
 }
 
+/* 正文 */
 .chapter-text {
   text-align: left;
   white-space: pre-line;
@@ -80,27 +81,47 @@ input {
   margin-bottom: 36px;
 }
 
+/* 音频 */
 .audio-block {
+  display: flex;
+  justify-content: center;
   margin-bottom: 22px;
 }
 
+audio {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* 答案 */
 .answer {
   margin-top: 20px;
   display: none;
   opacity: 0.85;
 }
 
+/* 播放暗幕 */
+#audioMask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 500;
+  display: none;
+  pointer-events: none;
+}
+
 /* 星光 */
 .star {
   position: fixed;
   z-index: 999;
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   background: white;
   border-radius: 50%;
   opacity: 0.8;
   pointer-events: none;
-  animation: float 4s linear forwards;
+  animation: float 6s linear forwards;
+  will-change: transform, opacity;
 }
 
 @keyframes float {
@@ -109,7 +130,7 @@ input {
     opacity: 0.8;
   }
   to {
-    transform: translateY(-120px);
+    transform: translateY(-160px);
     opacity: 0;
   }
 }
@@ -118,10 +139,10 @@ input {
 
 <body>
 
-<div id="audioDim"></div>
-  
+<div id="audioMask"></div>
+
 <!-- 首页 -->
-<div id="home" class="section active" style="text-align:center;">
+<div id="home" class="section active centered" style="text-align:center;">
   <p>
     欢迎你，小夏。<br>
     伟大的探险家，<br>
@@ -132,7 +153,7 @@ input {
   </div>
 </div>
 
-<!-- 序章 -->
+<!-- 序章（保持可滚动） -->
 <div id="prologue" class="section" style="text-align:center;">
   <p>
     我发觉，我们依赖视觉太多，<br>
@@ -164,7 +185,7 @@ input {
 </div>
 
 <!-- 密码 -->
-<div id="password" class="section" style="text-align:center;">
+<div id="password" class="section centered" style="text-align:center;">
   <p>请输入星辰编号</p>
   <input id="pwdInput" maxlength="4">
   <div class="button-row">
@@ -174,11 +195,9 @@ input {
 </div>
 
 <!-- 章节 -->
-<div id="chapter" class="section">
+<div id="chapter" class="section centered">
   <div id="chapterText" class="chapter-text"></div>
-
   <div id="answerText" class="answer"></div>
-
   <div id="audioContainer"></div>
 
   <div class="button-row">
@@ -188,7 +207,7 @@ input {
 </div>
 
 <!-- 生日 -->
-<div id="birthday" class="section" style="text-align:center;">
+<div id="birthday" class="section centered" style="text-align:center;">
   <h2>生日快乐，小夏</h2>
   <p>愿新的轨道，<br>仍有星辰相伴。</p>
   <div class="button-row">
@@ -197,31 +216,8 @@ input {
 </div>
 
 <script>
-function bindAudioDim() {
-  const audios = document.querySelectorAll("audio");
-  const dim = document.getElementById("audioDim");
-
-  audios.forEach(a => {
-    a.addEventListener("play", () => {
-      dim.classList.add("active");
-    });
-
-    a.addEventListener("pause", () => {
-      if (![...audios].some(x => !x.paused)) {
-        dim.classList.remove("active");
-      }
-    });
-
-    a.addEventListener("ended", () => {
-      if (![...audios].some(x => !x.paused)) {
-        dim.classList.remove("active");
-      }
-    });
-  });
-}
-
-  
 let starTimer = null;
+let playingCount = 0;
 
 const chapters = {
   "1128": {
@@ -278,16 +274,15 @@ const chapters = {
 function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-
-  if (id === "birthday") startStars();
-  else stopStars();
+  stopStars();
 }
 
 function checkPassword() {
-  const pwd = document.getElementById("pwdInput").value;
+  const pwd = pwdInput.value;
 
   if (pwd === "1218") {
     showSection("birthday");
+    startStars();
     return;
   }
 
@@ -298,24 +293,36 @@ function checkPassword() {
 
   const c = chapters[pwd];
   chapterText.innerText = c.text;
+  audioContainer.innerHTML = "";
   answerText.style.display = "none";
 
-  if (c.answer) {
+  if (pwd === "0526") {
     answerBtn.style.display = "inline-block";
     answerText.innerText = c.answer;
   } else {
     answerBtn.style.display = "none";
-    answerText.innerText = "";
   }
 
-  audioContainer.innerHTML = "";
   c.files.forEach(f => {
-    audioContainer.innerHTML += `
-      <div class="audio-block">
-        <audio controls src="${f}"></audio>
-      </div>`;
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.src = f;
+
+    audio.onplay = () => {
+      playingCount++;
+      audioMask.style.display = "block";
+    };
+    audio.onpause = audio.onended = () => {
+      playingCount--;
+      if (playingCount <= 0) audioMask.style.display = "none";
+    };
+
+    const div = document.createElement("div");
+    div.className = "audio-block";
+    div.appendChild(audio);
+    audioContainer.appendChild(div);
   });
-  bindAudioDim();
+
   showSection("chapter");
 }
 
@@ -330,10 +337,10 @@ function startStars() {
     const s = document.createElement("div");
     s.className = "star";
     s.style.left = Math.random() * window.innerWidth + "px";
-    s.style.bottom = "0px";
+    s.style.bottom = "0";
     document.body.appendChild(s);
-    setTimeout(() => s.remove(), 4000);
-  }, 300);
+    setTimeout(() => s.remove(), 6000);
+  }, 180);
 }
 
 function stopStars() {
