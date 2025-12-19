@@ -14,7 +14,6 @@ body {
   overflow-y: auto;
 }
 
-/* section 基础 */
 .section {
   display: none;
   max-width: 680px;
@@ -26,18 +25,9 @@ body {
   display: block;
 }
 
-/* 居中页面（除序章） */
-.section.centered {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+p {
+  line-height: 2;
 }
-
-/* 文本 */
-p { line-height: 2; }
 
 button {
   padding: 10px 28px;
@@ -64,16 +54,18 @@ input {
   justify-content: center;
   gap: 24px;
   margin-top: 28px;
-  flex-wrap: wrap;
 }
 
-/* 章节 */
 .chapter-text {
+  text-align: left;
   white-space: pre-line;
   line-height: 2;
   opacity: 0.92;
   margin-bottom: 36px;
-  text-align: left;
+}
+
+.audio-block {
+  margin-bottom: 22px;
 }
 
 .answer {
@@ -82,31 +74,26 @@ input {
   opacity: 0.85;
 }
 
-/* 音频播放变暗 */
-.audio-dim {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.6s ease;
-  z-index: 5;
-}
-.audio-dim.active { opacity: 1; }
-
-/* 银河 */
+/* 星光 */
 .star {
   position: fixed;
+  z-index: 999;
+  width: 4px;
+  height: 4px;
+  background: white;
   border-radius: 50%;
+  opacity: 0.8;
   pointer-events: none;
-  animation: drift linear forwards;
+  animation: float 4s linear forwards;
 }
 
-@keyframes drift {
-  from { opacity: 0; }
-  20% { opacity: 1; }
+@keyframes float {
+  from {
+    transform: translateY(0);
+    opacity: 0.8;
+  }
   to {
-    transform: translate(var(--dx), var(--dy));
+    transform: translateY(-120px);
     opacity: 0;
   }
 }
@@ -115,10 +102,8 @@ input {
 
 <body>
 
-<div class="audio-dim" id="audioDim"></div>
-
 <!-- 首页 -->
-<div id="home" class="section centered active">
+<div id="home" class="section active" style="text-align:center;">
   <p>
     欢迎你，小夏。<br>
     伟大的探险家，<br>
@@ -134,20 +119,26 @@ input {
   <p>
     我发觉，我们依赖视觉太多，<br>
     用文字记录、用图片记录、用视频记录。<br><br>
+
     在这里，我决定用音频记录。<br><br>
+
     如果文字、图片、视频<br>
     都能把我们拉回彼时彼刻，<br>
     那么，音频是不是也可以呢？<br><br>
+
     如果你没有参与彼时彼刻的故事，<br>
     那么，音频是不是可以<br>
     邀请你进入那个时空呢？<br><br>
+
     在一个安静的时刻，<br>
     戴上耳机，合上眼，<br>
     把自己抛向大气层。<br><br>
+
     我们就这样，<br>
     沉入这片星系，<br>
     拥抱这个宇宙。
   </p>
+
   <div class="button-row">
     <button onclick="showSection('home')">出发</button>
     <button onclick="showSection('password')">探索</button>
@@ -155,7 +146,7 @@ input {
 </div>
 
 <!-- 密码 -->
-<div id="password" class="section centered">
+<div id="password" class="section" style="text-align:center;">
   <p>请输入星辰编号</p>
   <input id="pwdInput" maxlength="4">
   <div class="button-row">
@@ -165,10 +156,13 @@ input {
 </div>
 
 <!-- 章节 -->
-<div id="chapter" class="section centered">
+<div id="chapter" class="section">
   <div id="chapterText" class="chapter-text"></div>
+
   <div id="answerText" class="answer"></div>
+
   <div id="audioContainer"></div>
+
   <div class="button-row">
     <button id="answerBtn" onclick="showAnswer()" style="display:none;">查看答案</button>
     <button onclick="showSection('prologue')">回到序章</button>
@@ -176,7 +170,7 @@ input {
 </div>
 
 <!-- 生日 -->
-<div id="birthday" class="section centered">
+<div id="birthday" class="section" style="text-align:center;">
   <h2>生日快乐，小夏</h2>
   <p>愿新的轨道，<br>仍有星辰相伴。</p>
   <div class="button-row">
@@ -243,31 +237,35 @@ function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 
-  // 🔴 关键修复：强制回到页面顶部
-  window.scrollTo({ top: 0, behavior: "instant" });
-
-  id === "birthday" ? startGalaxy() : stopGalaxy();
+  if (id === "birthday") startStars();
+  else stopStars();
 }
 
 function checkPassword() {
-  const pwd = pwdInput.value;
-  if (pwd === "1218") return showSection("birthday");
-  if (!chapters[pwd]) return alert("这组坐标尚未解锁。");
+  const pwd = document.getElementById("pwdInput").value;
+
+  if (pwd === "1218") {
+    showSection("birthday");
+    return;
+  }
+
+  if (!chapters[pwd]) {
+    alert("这组坐标尚未解锁。");
+    return;
+  }
 
   const c = chapters[pwd];
   chapterText.innerText = c.text;
   answerText.style.display = "none";
-  answerBtn.style.display = c.answer ? "inline-block" : "none";
-  answerText.innerText = c.answer || "";
+  answerBtn.style.display = "inline-block";
+  answerText.innerText = c.answer;
 
   audioContainer.innerHTML = "";
   c.files.forEach(f => {
-    const a = document.createElement("audio");
-    a.controls = true;
-    a.src = f;
-    a.onplay = () => audioDim.classList.add("active");
-    a.onpause = a.onended = () => audioDim.classList.remove("active");
-    audioContainer.appendChild(a);
+    audioContainer.innerHTML += `
+      <div class="audio-block">
+        <audio controls src="${f}"></audio>
+      </div>`;
   });
 
   showSection("chapter");
@@ -278,26 +276,19 @@ function showAnswer() {
   answerBtn.style.display = "none";
 }
 
-function startGalaxy() {
+function startStars() {
   if (starTimer) return;
   starTimer = setInterval(() => {
-    for (let i = 0; i < 6; i++) {
-      const s = document.createElement("div");
-      s.className = "star";
-      s.style.width = s.style.height = (Math.random()*2+1)+"px";
-      s.style.left = Math.random()*innerWidth+"px";
-      s.style.top = Math.random()*innerHeight+"px";
-      s.style.background = "rgba(255,255,255,0.8)";
-      s.style.setProperty("--dx",(Math.random()*200-100)+"px");
-      s.style.setProperty("--dy",(Math.random()*200-100)+"px");
-      s.style.animationDuration = (12+Math.random()*10)+"s";
-      document.body.appendChild(s);
-      setTimeout(()=>s.remove(),20000);
-    }
-  }, 400);
+    const s = document.createElement("div");
+    s.className = "star";
+    s.style.left = Math.random() * window.innerWidth + "px";
+    s.style.bottom = "0px";
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 4000);
+  }, 300);
 }
 
-function stopGalaxy() {
+function stopStars() {
   clearInterval(starTimer);
   starTimer = null;
 }
