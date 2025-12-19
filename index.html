@@ -1,104 +1,193 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>2025 · 秋冬序 · 声音</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #fafafa;
-      color: #333;
-      text-align: center;
-      padding: 60px 20px;
+      font-family: "PingFang SC", "Noto Serif SC", serif;
+      background: #f7f6f3;
+      color: #222;
+      line-height: 1.8;
+      padding: 40px;
+      max-width: 720px;
+      margin: auto;
     }
 
     h1 {
       font-weight: normal;
-      letter-spacing: 2px;
-    }
-
-    input {
-      font-size: 18px;
-      padding: 8px;
-      width: 140px;
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 8px 20px;
-      font-size: 14px;
-      cursor: pointer;
+      font-size: 22px;
+      margin-bottom: 24px;
     }
 
     .hidden {
       display: none;
     }
 
+    .password-box {
+      margin-top: 32px;
+    }
+
+    input {
+      font-size: 16px;
+      padding: 6px 10px;
+      width: 120px;
+    }
+
+    button {
+      font-size: 14px;
+      padding: 6px 12px;
+      margin-left: 8px;
+      cursor: pointer;
+    }
+
+    .entry {
+      margin-top: 32px;
+      white-space: pre-line;
+    }
+
     audio {
-      display: block;
-      margin: 20px auto;
+      width: 100%;
+      margin-top: 16px;
+    }
+
+    .back {
+      margin-top: 32px;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- 首页：输入密码 -->
-  <div id="home">
-    <h1>秋冬序</h1>
-    <p>请输入四位数字</p>
-    <input id="passwordInput" maxlength="4" />
-    <br>
-    <button onclick="checkPassword()">进入</button>
+<!-- 序章页 -->
+<div id="home">
+  <h1>秋冬序</h1>
+
+  <div class="entry">
+欢迎你，小夏。
+伟大的探险家，欢迎回到这颗星球。
+
+我发觉，我们依赖视觉太多，
+用文字记录、用图片记录、用视频记录。
+
+在这里，我决定用音频记录。
+
+如果文字、图片、视频
+都能把我们拉回彼时彼刻，
+那么，音频是不是也可以呢？
+
+如果你没有参与彼时彼刻的故事，
+那么，音频是不是可以
+邀请你进入那个时空呢？
+
+在一个安静的时刻，
+戴上耳机，合上眼，
+把自己抛向大气层。
+
+我们就这样，
+沉入这片星系，
+拥抱这个宇宙。
   </div>
 
-  <!-- 播放页 -->
-  <div id="player" class="hidden">
-    <div id="audioContainer"></div>
-    <button onclick="goHome()">回到序章</button>
+  <div class="password-box">
+    <input id="password" type="password" placeholder="四位密码" />
+    <button onclick="unlock()">进入</button>
   </div>
+</div>
 
-  <script>
-    const passwordMap = {
-      "1128": ["voice01.mp3"],
-      "1213": ["voice02.mp3"],
-      "1205": ["voice03.mp3", "voice04.mp3"],
-      "0526": ["voice05.mp3", "voice06.mp3"],
-      "1125": ["voice07.mp3"]
-    };
+<!-- 播放页 -->
+<div id="player" class="hidden">
+  <div id="text" class="entry"></div>
+  <div id="audios"></div>
 
-    function checkPassword() {
-      const input = document.getElementById("passwordInput").value;
-      const files = passwordMap[input];
+  <div class="back">
+    <button onclick="goBack()">回到序章</button>
+  </div>
+</div>
 
-      if (!files) {
-        alert("这个数字暂时没有声音。");
-        return;
-      }
+<script>
+  const data = {
+    "1128": {
+      text: `11月28日 · 朝天门
+忙碌的事情告一段落，我终于赶上了南京的秋。
+燕雀湖想留到你来南京一起去，枫叶还没红，于是我决定去看银杏。
+朝天门的门口，一排大爷在小马扎上打牌，我猜是掼蛋——在成都围一桌是麻将，在大连是滚子，在南京嘛，应该就是掼蛋吧！
+孩子们在台阶旁边的石板上滑滑梯，那块石板被磨得发亮，泛着白光。
+银杏在阳光里粼粼，在风中轻轻荡漾，真美呀，南京的秋。
+有机会，我们一起去看看吧，春夏秋冬，冬天太冷了，我们去看春夏秋。
 
-      document.getElementById("home").classList.add("hidden");
-      document.getElementById("player").classList.remove("hidden");
+另：
+走一步看一步，有点蠢蠢的没有把景区逛完。
+不过也好，以后，我有了一个更正当的理由拉着你来朝天门了。`,
+      files: ["voice01.mp3"]
+    },
 
-      const container = document.getElementById("audioContainer");
-      container.innerHTML = "";
+    "1213": {
+      text: `12月13日 · 南理工
+南京的十二月有自己的“落雪”。
+梧桐叶铺满地面，风吹起，又落下。
+我踩在落叶上，闭上眼，
+那声音听起来，竟像海苔碎。`,
+      files: ["voice02.mp3"]
+    },
 
-      files.forEach(file => {
-        const audio = document.createElement("audio");
-        audio.controls = true;
-        audio.src = file;
-        container.appendChild(audio);
-      });
+    "1205": {
+      text: `12月5日 · 燕雀湖 / 明孝陵
+照片里是叶、是湖、是景，
+音频里是风、是水、是人。
+欢迎来到秋日的明孝陵。
+
+另：
+第二段音频后半部分的滋滋声，
+是婴儿车走过明孝陵石子路的声音。`,
+      files: ["voice03.mp3", "voice04.mp3"]
+    },
+
+    "0526": {
+      text: `X0526
+有些星球，被命名是因为重逢。`,
+      files: ["voice05.mp3", "voice06.mp3"]
+    },
+
+    "1125": {
+      text: `11月25日 · 南理工
+午夜，校园外的公路很安静。
+汽车划过柏油路，
+像笔尖划过垫板，
+又像即将起飞的飞机。`,
+      files: ["voice07.mp3"]
+    }
+  };
+
+  function unlock() {
+    const pwd = document.getElementById("password").value;
+    if (!data[pwd]) {
+      alert("密码不对，再试试。");
+      return;
     }
 
-    function goHome() {
-      document.getElementById("player").classList.add("hidden");
-      document.getElementById("home").classList.remove("hidden");
-      document.getElementById("passwordInput").value = "";
-      document.getElementById("audioContainer").innerHTML = "";
-    }
-  </script>
+    document.getElementById("home").classList.add("hidden");
+    document.getElementById("player").classList.remove("hidden");
+
+    document.getElementById("text").innerText = data[pwd].text;
+
+    const audioBox = document.getElementById("audios");
+    audioBox.innerHTML = "";
+
+    data[pwd].files.forEach(file => {
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.src = file;
+      audioBox.appendChild(audio);
+    });
+  }
+
+  function goBack() {
+    document.getElementById("player").classList.add("hidden");
+    document.getElementById("home").classList.remove("hidden");
+    document.getElementById("password").value = "";
+  }
+</script>
 
 </body>
 </html>
