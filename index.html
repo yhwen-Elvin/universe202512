@@ -2,11 +2,26 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>2025 · 秋冬序</title>
 
 <style>
+#audioDim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  z-index: 10;
+}
+
+#audioDim.active {
+  opacity: 1;
+}
+
+  
 body {
+  
   margin: 0;
   font-family: "Helvetica Neue","PingFang SC",sans-serif;
   background: #0b0e1a;
@@ -15,32 +30,21 @@ body {
   overflow-y: auto;
 }
 
-/* 通用区块 */
 .section {
   display: none;
-  max-width: 720px;
-  padding: clamp(20px, 5vw, 36px);
+  max-width: 680px;
+  padding: 32px;
   margin: 0 auto;
-  box-sizing: border-box;
 }
 
 .section.active {
   display: block;
 }
 
-/* 非序章页面居中 */
-.centered {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
 p {
   line-height: 2;
 }
 
-/* 按钮 */
 button {
   padding: 10px 28px;
   font-size: 15px;
@@ -49,10 +53,8 @@ button {
   background: #ffffff;
   color: #0b0e1a;
   cursor: pointer;
-  min-width: 120px;
 }
 
-/* 输入框 */
 input {
   padding: 10px;
   font-size: 16px;
@@ -63,16 +65,13 @@ input {
   margin-top: 18px;
 }
 
-/* 按钮排布 */
 .button-row {
   display: flex;
   justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 24px;
   margin-top: 28px;
 }
 
-/* 正文 */
 .chapter-text {
   text-align: left;
   white-space: pre-line;
@@ -81,47 +80,27 @@ input {
   margin-bottom: 36px;
 }
 
-/* 音频 */
 .audio-block {
-  display: flex;
-  justify-content: center;
   margin-bottom: 22px;
 }
 
-audio {
-  width: 100%;
-  max-width: 420px;
-}
-
-/* 答案 */
 .answer {
   margin-top: 20px;
   display: none;
   opacity: 0.85;
 }
 
-/* 播放暗幕 */
-#audioMask {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  z-index: 500;
-  display: none;
-  pointer-events: none;
-}
-
 /* 星光 */
 .star {
   position: fixed;
   z-index: 999;
-  width: 3px;
-  height: 3px;
+  width: 4px;
+  height: 4px;
   background: white;
   border-radius: 50%;
   opacity: 0.8;
   pointer-events: none;
-  animation: float 6s linear forwards;
-  will-change: transform, opacity;
+  animation: float 4s linear forwards;
 }
 
 @keyframes float {
@@ -130,7 +109,7 @@ audio {
     opacity: 0.8;
   }
   to {
-    transform: translateY(-160px);
+    transform: translateY(-120px);
     opacity: 0;
   }
 }
@@ -139,10 +118,10 @@ audio {
 
 <body>
 
-<div id="audioMask"></div>
-
+<div id="audioDim"></div>
+  
 <!-- 首页 -->
-<div id="home" class="section active centered" style="text-align:center;">
+<div id="home" class="section active" style="text-align:center;">
   <p>
     欢迎你，小夏。<br>
     伟大的探险家，<br>
@@ -153,7 +132,7 @@ audio {
   </div>
 </div>
 
-<!-- 序章（保持可滚动） -->
+<!-- 序章 -->
 <div id="prologue" class="section" style="text-align:center;">
   <p>
     我发觉，我们依赖视觉太多，<br>
@@ -185,7 +164,7 @@ audio {
 </div>
 
 <!-- 密码 -->
-<div id="password" class="section centered" style="text-align:center;">
+<div id="password" class="section" style="text-align:center;">
   <p>请输入星辰编号</p>
   <input id="pwdInput" maxlength="4">
   <div class="button-row">
@@ -195,9 +174,11 @@ audio {
 </div>
 
 <!-- 章节 -->
-<div id="chapter" class="section centered">
+<div id="chapter" class="section">
   <div id="chapterText" class="chapter-text"></div>
+
   <div id="answerText" class="answer"></div>
+
   <div id="audioContainer"></div>
 
   <div class="button-row">
@@ -207,7 +188,7 @@ audio {
 </div>
 
 <!-- 生日 -->
-<div id="birthday" class="section centered" style="text-align:center;">
+<div id="birthday" class="section" style="text-align:center;">
   <h2>生日快乐，小夏</h2>
   <p>愿新的轨道，<br>仍有星辰相伴。</p>
   <div class="button-row">
@@ -216,33 +197,97 @@ audio {
 </div>
 
 <script>
+function bindAudioDim() {
+  const audios = document.querySelectorAll("audio");
+  const dim = document.getElementById("audioDim");
+
+  audios.forEach(a => {
+    a.addEventListener("play", () => {
+      dim.classList.add("active");
+    });
+
+    a.addEventListener("pause", () => {
+      if (![...audios].some(x => !x.paused)) {
+        dim.classList.remove("active");
+      }
+    });
+
+    a.addEventListener("ended", () => {
+      if (![...audios].some(x => !x.paused)) {
+        dim.classList.remove("active");
+      }
+    });
+  });
+}
+
+  
 let starTimer = null;
-let playingCount = 0;
 
 const chapters = {
-  "1128": { text:`11月28日 · 朝天门`, files:["voice01.mp3"] },
-  "1213": { text:`12月13日 · 南理工`, files:["voice02.mp3"] },
-  "1205": { text:`12月5日 · 燕雀湖 / 明孝陵`, files:["voice03.mp3","voice04.mp3"] },
-  "0526": {
-    text:`12月5日 · 明孝陵`,
-    answer:`答：是婴儿车走过石子路的声音。`,
-    files:["voice05.mp3","voice06.mp3"]
+  "1128": {
+    text: `11月28日 · 朝天门
+忙碌的事情告一段落，我终于赶上了南京的秋。
+燕雀湖想留到你来南京一起去，枫叶还没红，于是我决定去看银杏。
+朝天门的门口，一排大爷在小马扎上打牌，我猜是掼蛋——在成都围一桌是麻将，在大连是滚子，在南京嘛，应该就是掼蛋吧！
+孩子们在台阶旁边的石板上滑滑梯，那块石板被磨得发亮，泛着白光。
+银杏在阳光里粼粼，在风中轻轻荡漾，真美呀，南京的秋。
+有机会，我们一起去看看吧，春夏秋冬，冬天太冷了，我们去看春夏秋。
+
+另：
+走一步看一步，有点蠢蠢的没有把景区逛完。
+不过也好，以后，我有了一个更正当的理由拉着你来朝天门了。`,
+    files: ["voice01.mp3"]
   },
-  "1125": { text:`11月25日 · 南理工`, files:["voice07.mp3"] }
+  "1213": {
+    text: `12月13日 · 南理工
+南京的十二月有自己的“落雪”。
+梧桐叶铺满地面，风吹起，又落下。
+我踩在落叶上，闭上眼，
+梧桐清脆的声音，听起来竟像海苔碎！`,
+    files: ["voice02.mp3"]
+  },
+  "1205": {
+    text: `12月5日 · 燕雀湖 / 明孝陵
+照片里是叶、是湖、是景，
+音频里是风、是水、是人，
+欢迎来到秋日的明孝陵，我们就这样沉溺在这里，
+听风听雨，见山见水，看花看叶，
+观察四季轮转、光影跃动、还有这些有趣的人类。`,
+    files: ["voice03.mp3","voice04.mp3"]
+  },
+  "0526": {
+    text: `12月5日 · 明孝陵
+跟着乌鸦小姐或者先生，我又走了一遍明孝陵，
+风吹、鸟鸣、人行，
+我想，如果在这里待上四季，哪怕是发呆也是幸福的。
+另：猜猜看第二段音频后半部分的滋滋声是什么？`,
+    answer: `答：是婴儿车走过明孝陵石子路的声音！听起来就像是刚喷过油的烤肉。
+原来闭上眼睛，只听声音，我们拥有了一整个新的宇宙。`,
+    files: ["voice05.mp3","voice06.mp3"]
+  },
+  "1125": {
+    text: `11月25日 · 南理工
+午夜，校园外的柏油公路很安静。
+汽车划过柏油路，
+像笔尖划过垫板，
+又像即将起飞的飞机。`,
+    files: ["voice07.mp3"]
+  }
 };
 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  stopStars();
+
+  if (id === "birthday") startStars();
+  else stopStars();
 }
 
 function checkPassword() {
-  const pwd = pwdInput.value;
+  const pwd = document.getElementById("pwdInput").value;
 
   if (pwd === "1218") {
     showSection("birthday");
-    startStars();
     return;
   }
 
@@ -253,36 +298,24 @@ function checkPassword() {
 
   const c = chapters[pwd];
   chapterText.innerText = c.text;
-  audioContainer.innerHTML = "";
   answerText.style.display = "none";
 
-  if (pwd === "0526") {
+  if (c.answer) {
     answerBtn.style.display = "inline-block";
     answerText.innerText = c.answer;
   } else {
     answerBtn.style.display = "none";
+    answerText.innerText = "";
   }
 
+  audioContainer.innerHTML = "";
   c.files.forEach(f => {
-    const audio = document.createElement("audio");
-    audio.controls = true;
-    audio.src = f;
-
-    audio.onplay = () => {
-      playingCount++;
-      audioMask.style.display = "block";
-    };
-    audio.onpause = audio.onended = () => {
-      playingCount--;
-      if (playingCount <= 0) audioMask.style.display = "none";
-    };
-
-    const div = document.createElement("div");
-    div.className = "audio-block";
-    div.appendChild(audio);
-    audioContainer.appendChild(div);
+    audioContainer.innerHTML += `
+      <div class="audio-block">
+        <audio controls src="${f}"></audio>
+      </div>`;
   });
-
+  bindAudioDim();
   showSection("chapter");
 }
 
@@ -297,10 +330,10 @@ function startStars() {
     const s = document.createElement("div");
     s.className = "star";
     s.style.left = Math.random() * window.innerWidth + "px";
-    s.style.bottom = "0";
+    s.style.bottom = "0px";
     document.body.appendChild(s);
-    setTimeout(() => s.remove(), 6000);
-  }, 180);
+    setTimeout(() => s.remove(), 4000);
+  }, 300);
 }
 
 function stopStars() {
