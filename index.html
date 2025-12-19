@@ -76,8 +76,6 @@ input {
   text-align: left;
 }
 
-.audio-block { margin-bottom: 22px; }
-
 .answer {
   margin-top: 20px;
   display: none;
@@ -96,7 +94,7 @@ input {
 }
 .audio-dim.active { opacity: 1; }
 
-/* 银河星光 */
+/* 银河 */
 .star {
   position: fixed;
   border-radius: 50%;
@@ -239,13 +237,12 @@ const chapters = {
 又像即将起飞的飞机。`,
     files: ["voice07.mp3"]
   }
-};
+};;
 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if (id === "birthday") startGalaxy();
-  else stopGalaxy();
+  id === "birthday" ? startGalaxy() : stopGalaxy();
 }
 
 function checkPassword() {
@@ -283,14 +280,13 @@ function startGalaxy() {
     for (let i = 0; i < 6; i++) {
       const s = document.createElement("div");
       s.className = "star";
-      const size = Math.random()*2 + 1;
-      s.style.width = s.style.height = size+"px";
-      s.style.left = Math.random()*window.innerWidth+"px";
-      s.style.top = Math.random()*window.innerHeight+"px";
-      s.style.background = "rgba(255,255,255,"+(Math.random()*0.8+0.2)+")";
+      s.style.width = s.style.height = (Math.random()*2+1)+"px";
+      s.style.left = Math.random()*innerWidth+"px";
+      s.style.top = Math.random()*innerHeight+"px";
+      s.style.background = "rgba(255,255,255,0.8)";
       s.style.setProperty("--dx",(Math.random()*200-100)+"px");
       s.style.setProperty("--dy",(Math.random()*200-100)+"px");
-      s.style.animationDuration = (10+Math.random()*10)+"s";
+      s.style.animationDuration = (12+Math.random()*10)+"s";
       document.body.appendChild(s);
       setTimeout(()=>s.remove(),20000);
     }
