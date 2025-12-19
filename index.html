@@ -32,6 +32,8 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 /* 文本 */
@@ -71,6 +73,7 @@ input {
   line-height: 2;
   opacity: 0.92;
   margin-bottom: 36px;
+  text-align: left;
 }
 
 .audio-block { margin-bottom: 22px; }
@@ -102,11 +105,8 @@ input {
 }
 
 @keyframes drift {
-  from {
-    transform: translate(0,0);
-    opacity: 0;
-  }
-  10% { opacity: 1; }
+  from { opacity: 0; }
+  20% { opacity: 1; }
   to {
     transform: translate(var(--dx), var(--dy));
     opacity: 0;
@@ -120,7 +120,7 @@ input {
 <div class="audio-dim" id="audioDim"></div>
 
 <!-- 首页 -->
-<div id="home" class="section centered active" style="text-align:center;">
+<div id="home" class="section centered active">
   <p>
     欢迎你，小夏。<br>
     伟大的探险家，<br>
@@ -131,7 +131,7 @@ input {
   </div>
 </div>
 
-<!-- 序章（不居中，可滚动） -->
+<!-- 序章 -->
 <div id="prologue" class="section" style="text-align:center;">
   <p>
     我发觉，我们依赖视觉太多，<br>
@@ -157,7 +157,7 @@ input {
 </div>
 
 <!-- 密码 -->
-<div id="password" class="section centered" style="text-align:center;">
+<div id="password" class="section centered">
   <p>请输入星辰编号</p>
   <input id="pwdInput" maxlength="4">
   <div class="button-row">
@@ -178,7 +178,7 @@ input {
 </div>
 
 <!-- 生日 -->
-<div id="birthday" class="section centered" style="text-align:center;">
+<div id="birthday" class="section centered">
   <h2>生日快乐，小夏</h2>
   <p>愿新的轨道，<br>仍有星辰相伴。</p>
   <div class="button-row">
@@ -188,24 +188,62 @@ input {
 
 <script>
 let starTimer = null;
-let starDensity = 300;
 
 const chapters = {
+  "1128": {
+    text: `11月28日 · 朝天门
+忙碌的事情告一段落，我终于赶上了南京的秋。
+燕雀湖想留到你来南京一起去，枫叶还没红，于是我决定去看银杏。
+朝天门的门口，一排大爷在小马扎上打牌，我猜是掼蛋——在成都围一桌是麻将，在大连是滚子，在南京嘛，应该就是掼蛋吧！
+孩子们在台阶旁边的石板上滑滑梯，那块石板被磨得发亮，泛着白光。
+银杏在阳光里粼粼，在风中轻轻荡漾，真美呀，南京的秋。
+有机会，我们一起去看看吧，春夏秋冬，冬天太冷了，我们去看春夏秋。
+
+另：
+走一步看一步，有点蠢蠢的没有把景区逛完。
+不过也好，以后，我有了一个更正当的理由拉着你来朝天门了。`,
+    files: ["voice01.mp3"]
+  },
+  "1213": {
+    text: `12月13日 · 南理工
+南京的十二月有自己的“落雪”。
+梧桐叶铺满地面，风吹起，又落下。
+我踩在落叶上，闭上眼，
+梧桐清脆的声音，听起来竟像海苔碎！`,
+    files: ["voice02.mp3"]
+  },
+  "1205": {
+    text: `12月5日 · 燕雀湖 / 明孝陵
+照片里是叶、是湖、是景，
+音频里是风、是水、是人，
+欢迎来到秋日的明孝陵，我们就这样沉溺在这里，
+听风听雨，见山见水，看花看叶，
+观察四季轮转、光影跃动、还有这些有趣的人类。`,
+    files: ["voice03.mp3","voice04.mp3"]
+  },
   "0526": {
     text: `12月5日 · 明孝陵
 跟着乌鸦小姐或者先生，我又走了一遍明孝陵，
 风吹、鸟鸣、人行，
 我想，如果在这里待上四季，哪怕是发呆也是幸福的。
 另：猜猜看第二段音频后半部分的滋滋声是什么？`,
-    answer: `答：是婴儿车走过明孝陵石子路的声音！`,
+    answer: `答：是婴儿车走过明孝陵石子路的声音！听起来就像是刚喷过油的烤肉。
+原来闭上眼睛，只听声音，我们拥有了一整个新的宇宙。`,
     files: ["voice05.mp3","voice06.mp3"]
+  },
+  "1125": {
+    text: `11月25日 · 南理工
+午夜，校园外的柏油公路很安静。
+汽车划过柏油路，
+像笔尖划过垫板，
+又像即将起飞的飞机。`,
+    files: ["voice07.mp3"]
   }
 };
 
 function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-
   if (id === "birthday") startGalaxy();
   else stopGalaxy();
 }
@@ -218,8 +256,8 @@ function checkPassword() {
   const c = chapters[pwd];
   chapterText.innerText = c.text;
   answerText.style.display = "none";
-  answerBtn.style.display = "inline-block";
-  answerText.innerText = c.answer;
+  answerBtn.style.display = c.answer ? "inline-block" : "none";
+  answerText.innerText = c.answer || "";
 
   audioContainer.innerHTML = "";
   c.files.forEach(f => {
@@ -239,26 +277,24 @@ function showAnswer() {
   answerBtn.style.display = "none";
 }
 
-/* 银河 */
 function startGalaxy() {
   if (starTimer) return;
   starTimer = setInterval(() => {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 6; i++) {
       const s = document.createElement("div");
       s.className = "star";
-      const size = Math.random() * 2 + 1;
-      s.style.width = s.style.height = size + "px";
-      s.style.left = Math.random() * window.innerWidth + "px";
-      s.style.top = Math.random() * window.innerHeight + "px";
-      s.style.background = `rgba(255,255,255,${Math.random()})`;
-      s.style.filter = "blur(0.5px)";
-      s.style.setProperty("--dx", (Math.random()*100-50)+"px");
-      s.style.setProperty("--dy", (Math.random()*100-50)+"px");
-      s.style.animationDuration = (8 + Math.random()*8) + "s";
+      const size = Math.random()*2 + 1;
+      s.style.width = s.style.height = size+"px";
+      s.style.left = Math.random()*window.innerWidth+"px";
+      s.style.top = Math.random()*window.innerHeight+"px";
+      s.style.background = "rgba(255,255,255,"+(Math.random()*0.8+0.2)+")";
+      s.style.setProperty("--dx",(Math.random()*200-100)+"px");
+      s.style.setProperty("--dy",(Math.random()*200-100)+"px");
+      s.style.animationDuration = (10+Math.random()*10)+"s";
       document.body.appendChild(s);
-      setTimeout(() => s.remove(), 16000);
+      setTimeout(()=>s.remove(),20000);
     }
-  }, starDensity);
+  }, 400);
 }
 
 function stopGalaxy() {
